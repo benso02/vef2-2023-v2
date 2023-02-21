@@ -49,7 +49,7 @@ async function eventRegisteredRoute(req, res) {
 }
 
 async function validationCheck(req, res, next) {
-  const { name, comment } = req.body;
+  const { name, comment} = req.body;
 
   // TODO tvítekning frá því að ofan
   const { slug } = req.params;
@@ -58,7 +58,7 @@ async function validationCheck(req, res, next) {
 
   const data = {
     name,
-    comment,
+    comment
   };
 
   const validation = validationResult(req);
