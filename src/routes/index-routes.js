@@ -8,7 +8,9 @@ import {
   xssSanitizationMiddleware
 } from '../lib/validation.js';
 
+
 export const indexRouter = express.Router();
+
 
 async function indexRoute(req, res) {
   const events = await listEvents();
@@ -29,10 +31,13 @@ async function eventRoute(req, res, next) {
   }
 
   const registered = await listRegistered(event.id);
+  console.log(registered)
+  const userRegistration = null;
 
   return res.render('event', {
     title: `${event.name} — Viðburðasíðan`,
     event,
+    userRegistration,
     registered,
     errors: [],
     data: {},

@@ -51,8 +51,9 @@ app.locals = {
 
 
 app.use('/admin', adminRouter);
-app.use('/', indexRouter); 
 app.use('/', userRouter); 
+app.use('/', indexRouter); 
+
 
 /** Middleware sem sér um 404 villur. */
 app.use((req, res) => {
