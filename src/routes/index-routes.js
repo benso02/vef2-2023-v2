@@ -31,7 +31,6 @@ async function eventRoute(req, res, next) {
   }
 
   const registered = await listRegistered(event.id);
-  console.log(registered)
   const userRegistration = null;
 
   return res.render('event', {
@@ -54,7 +53,8 @@ async function eventRegisteredRoute(req, res) {
 }
 
 async function validationCheck(req, res, next) {
-  const { name, comment} = req.body;
+  const { user: { id } = {} } = req || {};
+  const { comment} = req.body;
 
   // TODO tvítekning frá því að ofan
   const { slug } = req.params;
@@ -62,7 +62,7 @@ async function validationCheck(req, res, next) {
   const registered = await listRegistered(event.id);
 
   const data = {
-    name,
+    id,
     comment
   };
 
@@ -82,12 +82,14 @@ async function validationCheck(req, res, next) {
 }
 
 async function registerRoute(req, res) {
-  const { name, comment } = req.body;
+  const { comment } = req.body;
   const { slug } = req.params;
   const event = await listEvent(slug);
+  const { user: { id } = {} } = req || {};
+
 
   const registered = await register({
-    name,
+    id,
     comment,
     event: event.id,
   });
@@ -98,6 +100,8 @@ async function registerRoute(req, res) {
 
   return res.render('error');
 }
+
+
 
 indexRouter.get('/', catchErrors(indexRoute));
 indexRouter.get('/:slug', catchErrors(eventRoute));
@@ -110,3 +114,5 @@ indexRouter.post(
   catchErrors(registerRoute)
 );
 indexRouter.get('/:slug/thanks', catchErrors(eventRegisteredRoute));
+
+

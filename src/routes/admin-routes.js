@@ -2,15 +2,14 @@ import express from 'express';
 import { validationResult } from 'express-validator';
 import { catchErrors } from '../lib/catch-errors.js';
 import {
-  createEvent,
-  dropEvent,
-  listEvent,
+  createEvent, dropEvent, listEvent,
   listEventByName,
   listEvents,
   updateEvent
 } from '../lib/db.js';
 import { ensureLoggedIn } from '../lib/login.js';
 import { slugify } from '../lib/slugify.js';
+import { isAdmin } from '../lib/users.js';
 import {
   registrationValidationMiddleware,
   sanitizationMiddleware,
@@ -23,6 +22,8 @@ async function index(req, res) {
   const events = await listEvents();
   const { user: { username } = {} } = req || {};
 
+
+  if(isAdmin(username)){
   return res.render('admin', {
     username,
     events,
@@ -30,6 +31,16 @@ async function index(req, res) {
     data: {},
     title: 'Viðburðir — umsjón',
     admin: true,
+  });
+}
+
+  return res.render('user', {
+    username,
+    events,
+    errors: [],
+    data: {},
+    title: 'Viðburðir — umsjón',
+    admin: false,
   });
 }
 
@@ -73,7 +84,7 @@ async function validationCheck(req, res, next) {
 }
 
 async function validationCheckUpdate(req, res, next) {
-  const { name, description } = req.body;
+  const { name, description, location, URL } = req.body;
   const { slug } = req.params;
   const { user: { username } = {} } = req;
 
@@ -82,6 +93,8 @@ async function validationCheckUpdate(req, res, next) {
   const data = {
     name,
     description,
+    location,
+    URL,
   };
 
   const validation = validationResult(req);
@@ -98,6 +111,8 @@ async function validationCheckUpdate(req, res, next) {
   }
 
   if (!validation.isEmpty() || customValidations.length > 0) {
+    console.log(data)
+    
     return res.render('admin-event', {
       username,
       event,
@@ -112,10 +127,12 @@ async function validationCheckUpdate(req, res, next) {
 }
 
 async function registerRoute(req, res) {
-  const { name, description, creatorId } = req.body;
+ 
+  const { name, URL, location, description } = req.body;
   const slug = slugify(name);
+  const creatorId = 1;
 
-  const created = await createEvent({ name, slug, description, creatorId });
+  const created = await createEvent({ name, URL, location, slug, description, creatorId });
 
   if (created) {
     return res.redirect('/admin');
@@ -125,17 +142,18 @@ async function registerRoute(req, res) {
 }
 
 async function updateRoute(req, res) {
-  const { name, description } = req.body;
+  const { name, description, location, URL } = req.body;
   const { slug } = req.params;
 
   const event = await listEvent(slug);
 
   const newSlug = slugify(name);
-
   const updated = await updateEvent(event.id, {
     name,
     slug: newSlug,
     description,
+    location,
+    URL,
   });
 
   if (updated) {
@@ -144,17 +162,15 @@ async function updateRoute(req, res) {
 
   return res.render('error');
 }
-async function dropEventRoute(req, res){
-  const { slug } = req.params;
-  const event = await listEvent(slug);
-
-  const created = await dropEvent(event.id)
-  if(created){
-    return res.redirect('/admin')
+async function dropEventRoute(req, res) {
+  const { id } = req.body;
+  const created = await dropEvent({ id });
+  if (created) {
+    return res.redirect('/admin');
   }
-  return res.redirect('error')
-
+  return res.render('error');
 }
+
 
 async function eventRoute(req, res, next) {
   const { slug } = req.params;
@@ -165,15 +181,22 @@ async function eventRoute(req, res, next) {
   if (!event) {
     return next();
   }
+  const data = {
+    name: event.name,
+    description: event.description,
+    URL: event.url,
+    location: event.location,
+  }
 
   return res.render('admin-event', {
     username,
     title: `${event.name} — Viðburðir — umsjón`,
     event,
     errors: [],
-    data: { name: event.name, description: event.description },
+    data,
   });
 }
+adminRouter.post('/dropEvent', catchErrors(dropEventRoute));
  
 adminRouter.get('/', ensureLoggedIn, catchErrors(index));
 adminRouter.post(
@@ -196,5 +219,5 @@ adminRouter.post(
   catchErrors(validationCheckUpdate),
   sanitizationMiddleware('description'),
   catchErrors(updateRoute),
-  catchErrors(dropEventRoute)
 );
+

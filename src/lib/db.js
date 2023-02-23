@@ -57,15 +57,15 @@ export async function dropSchema(dropFile = DROP_SCHEMA_FILE) {
   return query(data.toString('utf-8'));
 }
 
-export async function createEvent({ name, slug, description} = {}) {
+export async function createEvent({ name, URL, location, slug, description, creatorId} = {}) {
   const q = `
     INSERT INTO events
-      (name, slug, description)
+      (name, URL, location, slug, description, creatorId)
     VALUES
-      ($1, $2, $3, $4)
-    RETURNING id, name, slug, description;
+      ($1, $2, $3, $4, $5, $6)
+    RETURNING id, name, URL, location, slug, description;
   `;
-  const values = [name, slug, description];
+  const values = [name, URL, location, slug, description, creatorId];
   const result = await query(q, values);
 
   if (result && result.rowCount === 1) {
@@ -74,7 +74,7 @@ export async function createEvent({ name, slug, description} = {}) {
 
   return null;
 }
-export async function dropEvent({ id} = {}) {
+export async function dropEvent({id}={}) {
   const q = `
     DELETE FROM
      events
@@ -92,19 +92,21 @@ export async function dropEvent({ id} = {}) {
 }
 
 // Updatear ekki description, erum ekki að útfæra partial update
-export async function updateEvent(id, { name, slug, description } = {}) {
+export async function updateEvent(id, { name, slug, description, location, URL } = {}) {
   const q = `
     UPDATE events
       SET
         name = $1,
         slug = $2,
         description = $3,
+        location = $5,
+        URL = $6,
         updated = CURRENT_TIMESTAMP
     WHERE
       id = $4
     RETURNING id, name, slug, description;
   `;
-  const values = [name, slug, description, id];
+  const values = [name, slug, description, id, location, URL];
   const result = await query(q, values);
 
   if (result && result.rowCount === 1) {
@@ -114,16 +116,16 @@ export async function updateEvent(id, { name, slug, description } = {}) {
   return null;
 }
 
-export async function register({ name, comment, event } = {}) {
+export async function register({ id, comment, event } = {}) {
   const q = `
     INSERT INTO registrations
-      (name, comment, event)
+      (userid, comment, event)
     VALUES
       ($1, $2, $3)
     RETURNING
-      id, name, comment, event;
+      id, userid, comment, event;
   `;
-  const values = [name, comment, event];
+  const values = [id, comment, event];
   const result = await query(q, values);
 
   if (result && result.rowCount === 1) {
@@ -133,10 +135,27 @@ export async function register({ name, comment, event } = {}) {
   return null;
 }
 
+export async function dropRegistration({id}={}){
+   const q = `
+   DELETE FROM
+    registrations
+     WHERE
+      userid=$1;
+    `;
+  const values = [id];
+  const result = await query(q, values);
+
+  if (result) {
+    return true;
+  }
+
+  return false;
+
+}
 export async function listEvents() {
   const q = `
     SELECT
-      id, name, slug, description, created, updated
+      id, name,location, url,  slug, description, created, updated
     FROM
       events
   `;
@@ -153,7 +172,7 @@ export async function listEvents() {
 export async function listEvent(slug) {
   const q = `
     SELECT
-      id, name, slug, description, created, updated
+      id, name, url, location, slug, description, created, updated
     FROM
       events
     WHERE slug = $1
@@ -172,7 +191,7 @@ export async function listEvent(slug) {
 export async function listEventByName(name) {
   const q = `
     SELECT
-      id, name, slug, description, created, updated
+      id, name, location, URL, slug, description, created, updated
     FROM
       events
     WHERE name = $1

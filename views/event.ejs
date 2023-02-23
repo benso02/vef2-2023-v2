@@ -3,6 +3,12 @@
 <section class="event">
   <div class="event__info">
     <h1 class="event__title"><%= event.name %></h1>
+     <% if (typeof event.url !== ('undefined'|| '')) { %>
+     <p> <strong>Slóð á viðburð </strong> <a href = "<%= event.url %>"><%= event.url %></a></p>
+      <% } %>
+       <% if (typeof event.location !== ('undefined'|| '')) { %>
+        <p> <strong>Staðsetning </strong> <%= event.location %></p>
+      <% } %>
     <p class="event__description"><%= event.description %></p>
   </div>
 
@@ -15,19 +21,28 @@
         <% registered.forEach((entry) => { %>
           <li class="event__registeredItem">
             <span class="event__registeredName"><%= entry.name %></span>
-            <% if (entry.comment) { %>
+            <% if (entry.comment) { %> 
               <span class="event__registeredComment"><%= entry.comment %></span>
             <% } %>
+            <% if (user) { %>
+              <% if (entry.name===user.name) { %>
+                <form method="post" action="/dropRegistration" enctype="application/x-www-form-urlencoded" class="">
+                  <input type="hidden" value= <%= user.id %> name="id" id="id">
+                  <button class="button">Afskrá mig</button>
+                </form>
+             <% } %>
+           <% } %>
           </li>
         <% }); %>
       </ul>
     <% } %>
+    
   </div>
   <div class="event__registration">
     <h2 class="event__subtitle">Skráðu þig</h2>
     <form method="post" action="/<%= event.slug %>" enctype="application/x-www-form-urlencoded" class="">
       <% if (user) { %>
-        <p> Skráður inn sem <%= user.username%> </p>
+        <p> Skráður inn sem <strong> <%= user.username%> </strong></p>
           <div class="field field--textarea<%= locals.isInvalid('comment', errors) ?  ' field--invalid' : '' %>">
         <label for="comment">Athugasemd:</label>
         <textarea name="comment" id="comment"><%= data.comment %></textarea>
@@ -41,9 +56,11 @@
           <% }); %>
         </ul>
       <% } %>
-
-      <button class="button">Skrá mig</button>
-
+      <% if (registered.includes(user.id)) { %>
+      <button class="button">Afskrá mig</button>
+       <% } else { %>
+        <button class="button">Skrá mig</button>
+      <% } %>
       <% } else { %>
       <a href="login"> Vinsamlegast skráðu þig inn <a>
       <% } %>

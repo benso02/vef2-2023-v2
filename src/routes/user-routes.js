@@ -1,6 +1,6 @@
 import express from 'express';
 import { catchErrors } from '../lib/catch-errors.js';
-import { listEvents } from '../lib/db.js';
+import { dropRegistration, listEvents } from '../lib/db.js';
 import passport from '../lib/login.js';
 import { createUser, isAdmin } from '../lib/users.js';
 
@@ -11,16 +11,27 @@ export const userRouter = express.Router();
 async function index(req, res) {
   const events = await listEvents();
   const { user: { username } = {} } = req || {};
-
-  return res.render('user', {
-    username,
-    events,
-    errors: [],
-    data: {},
-    title: 'Viðburðir — umsjón',
-    admin: false,
-  });
-}
+  const admin = await isAdmin(username);
+  if(admin){
+    return res.render('admin', {
+      username,
+      events,
+      errors: [],
+      data: {},
+      title: 'Viðburðir — umsjón',
+      admin: true,
+    });
+  }
+  
+    return res.render('user', {
+      username,
+      events,
+      errors: [],
+      data: {},
+      title: 'Viðburðir — umsjón',
+      admin: false,
+    });
+  }
 
 
 function login(req, res) {
@@ -47,7 +58,7 @@ function login(req, res) {
     // Þetta notar strat að ofan til að skrá notanda inn
     passport.authenticate('local', {
       failureMessage: 'Notandanafn eða lykilorð vitlaust.',
-      failureRedirect: '/user/login',
+      failureRedirect: '/login',
     }),
   
     // Ef við komumst hingað var notandi skráður inn, senda á /admin
@@ -63,12 +74,8 @@ function login(req, res) {
 
     }
   );
-  
-  userRouter.get('/logout', (req, res) => {
-    // logout hendir session cookie og session
-    req.logout();
-    res.redirect('/');
-  });
+
+
 
 // Verður að vera seinast svo það taki ekki yfir önnur route
 
@@ -100,6 +107,21 @@ function login(req, res) {
     res.render('user', {title: 'Notendasíða', errors: []});
   });
 
+
+  userRouter.get('/logout', (req, res) => {
+    // logout hendir session cookie og session
+    req.logout();
+    res.redirect('/login');
+  });
   
+  async function dropRegistrationRoute(req, res) {
+    const { user: { id} = {} } = req || {};
+    const created = await dropRegistration({ id });
+    if (created) {
+      return res.redirect('/user');
+    }
+    return res.render('error');
+  }
   
+  userRouter.post('/dropRegistration', catchErrors(dropRegistrationRoute));
 

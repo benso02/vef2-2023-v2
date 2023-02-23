@@ -10,6 +10,8 @@ CREATE TABLE public.users (
 CREATE TABLE public.events (
   id SERIAL PRIMARY KEY,
   name VARCHAR(64) NOT NULL,
+  url  VARCHAR(64),
+  location VARCHAR(64),
   slug VARCHAR(64) NOT NULL,
   description TEXT,
   created TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

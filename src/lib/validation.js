@@ -5,13 +5,6 @@ import xss from 'xss';
 
 export function registrationValidationMiddleware(textField) {
   return [
-    body('name')
-      .trim()
-      .isLength({ min: 1 })
-      .withMessage('Nafn má ekki vera tómt'),
-    body('name')
-      .isLength({ max: 64 })
-      .withMessage('Nafn má að hámarki vera 64 stafir'),
     body(textField)
       .isLength({ max: 400 })
       .withMessage(
