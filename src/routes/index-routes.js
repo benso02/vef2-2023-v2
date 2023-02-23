@@ -1,7 +1,14 @@
 import express from 'express';
 import { validationResult } from 'express-validator';
 import { catchErrors } from '../lib/catch-errors.js';
-import { listEvent, listEvents, listRegistered, register } from '../lib/db.js';
+import {
+  getEventCount,
+  getEvents,
+  listEvent,
+  listEvents,
+  listRegistered,
+  register
+} from '../lib/db.js';
 import {
   registrationValidationMiddleware,
   sanitizationMiddleware,
@@ -100,7 +107,17 @@ async function registerRoute(req, res) {
 
   return res.render('error');
 }
+indexRouter.get('/', async (req, res) => {
+  const currentPage = req.query.page || 1;
+  const eventCount = await getEventCount();
+  const maxEvents = eventCount.max;
+  const pageCount = Math.ceil(maxEvents / 10);
+  const events = await getEvents(currentPage);
+  const title= 'Viðburðasíðan'
+  const admin= false;
 
+  res.render('index', { title, events, pageCount, currentPage, admin });
+});
 
 
 indexRouter.get('/', catchErrors(indexRoute));

@@ -155,7 +155,7 @@ export async function dropRegistration({id}={}){
 export async function listEvents() {
   const q = `
     SELECT
-      id, name,location, url,  slug, description, created, updated
+      id, name, slug, description, created, updated
     FROM
       events
   `;
@@ -167,6 +167,27 @@ export async function listEvents() {
   }
 
   return null;
+}
+
+export async function getEvents(page) {
+  const perPage = 10;
+  const offset = (page - 1) * perPage;
+
+  const q = `SELECT 
+  id, name, url, location, slug, description, created, updated 
+  FROM 
+  events 
+  ORDER BY id LIMIT $1 OFFSET $2
+  `;
+
+  const values = [perPage, offset];    
+    const result = await query(q, values);
+
+    if (result) {
+      return result.rows;
+    }
+    
+    return null;
 }
 
 export async function listEvent(slug) {
@@ -186,6 +207,24 @@ export async function listEvent(slug) {
 
   return null;
 }
+export async function getEventCount() {
+  const q = `
+    SELECT
+     max(id)
+    FROM
+      events
+  `;
+  const result = await query(q);
+
+  if (result && result.rowCount === 1) {
+    return result.rows[0];
+  }
+
+  return null;
+
+}
+
+
 
 // TODO gætum fellt þetta fall saman við það að ofan
 export async function listEventByName(name) {
