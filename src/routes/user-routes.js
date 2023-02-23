@@ -3,6 +3,7 @@ import { catchErrors } from '../lib/catch-errors.js';
 import { dropRegistration, getEventCount, getEvents, listEvents } from '../lib/db.js';
 import passport from '../lib/login.js';
 import { createUser, isAdmin } from '../lib/users.js';
+import { registrationValidation } from '../lib/validation.js';
 
 
 
@@ -95,11 +96,21 @@ function login(req, res) {
 // Verður að vera seinast svo það taki ekki yfir önnur route
 
  userRouter.get('/register', (req, res)=> {
-   res.render('register', {title: 'Nýskráning'});
+   const errors=[];
+   res.render('register', {title: 'Nýskráning',errors});
  });
 
  async function registerUser(req, res){
   const{name, username, password}= req.body;
+  
+
+  const errors= registrationValidation(name, username,password)
+  console.log(errors);
+
+  if(errors){
+   
+    return res.render('register', {title: 'Nýskráning', errors});
+  }
   const user = await createUser(name, username, password);
 
   if(user){
@@ -124,9 +135,8 @@ function login(req, res) {
 
 
   userRouter.get('/logout', (req, res) => {
-    // logout hendir session cookie og session
     req.logout();
-    res.redirect('/login');
+    res.redirect('/');
   });
   
   async function dropRegistrationRoute(req, res) {
@@ -137,6 +147,7 @@ function login(req, res) {
     }
     return res.render('error');
   }
+
   
   userRouter.post('/dropRegistration', catchErrors(dropRegistrationRoute));
 

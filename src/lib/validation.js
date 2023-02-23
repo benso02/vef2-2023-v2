@@ -15,6 +15,32 @@ export function registrationValidationMiddleware(textField) {
   ];
 }
 
+export function registrationValidation() {
+  return [
+    body('name')
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage('Nafn má ekki vera tómt'),
+    body('name')
+      .isLength({ max: 64 })
+      .withMessage('Nafn má að hámarki vera 64 stafir'),
+    body('username')
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage('Notendanafn má ekki vera tómt'),
+    body('username')
+      .isLength({ max: 64 })
+      .withMessage('Notendanafn má að hámarki vera 64 stafir'),
+    body('password')
+      .trim()
+      .isLength({ min: 8 })
+      .withMessage('Lykilorð má ekki vera minna en 8 stafir'),
+    body('password')
+      .isLength({ max: 64 })
+      .withMessage('Lykilorð má að hámarki vera 64 stafir'),
+  ];
+}
+
 // Viljum keyra sér og með validation, ver gegn „self XSS“
 export function xssSanitizationMiddleware(textField) {
   return [

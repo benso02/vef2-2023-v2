@@ -23,9 +23,17 @@
    <% if (typeof message !== 'undefined') { %>
   <p><%= message %></p>
   <% } %>
-
-  <button class="button">Innskrá</button>
+<% if (errors.length > 0) { %>
+      <h3 class="errors__title">Villur við skráningu:</h3>
+      <ul class="errors">
+        <% errors.forEach((error) => { %>
+          <li class="error"><label for="<%= error.param %>"><%= error.msg %></label></li>
+        <% }); %>
+      </ul>
+    <% } %>
+  <button class="button">Nýskráning</button>
 </form>
+
 
 <a href="/">Til baka</a>
 
