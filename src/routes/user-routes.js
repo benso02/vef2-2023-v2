@@ -104,8 +104,7 @@ function login(req, res) {
   const{name, username, password}= req.body;
   
 
-  const errors= registrationValidation(name, username,password)
-  console.log(errors);
+  const errors= registrationValidation(name, username,password);
 
   if(errors){
    

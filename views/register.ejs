@@ -23,12 +23,18 @@
    <% if (typeof message !== 'undefined') { %>
   <p><%= message %></p>
   <% } %>
-<% if (errors.length > 0) { %>
+  <% if (Object.keys(errors).length > 0) { %>
       <h3 class="errors__title">Villur við skráningu:</h3>
       <ul class="errors">
-        <% errors.forEach((error) => { %>
-          <li class="error"><label for="<%= error.param %>"><%= error.msg %></label></li>
-        <% }); %>
+      <% if (errors.name.length > 0) { %>
+       <li class="error"> <%= errors.name %> </li>
+       <% } %>
+       <% if (errors.username.length > 0) { %>
+       <li class="error"> <%= errors.username %> </li>
+      <% } %>
+       <% if (errors.password.length > 0) { %>
+       <li class="error"> <%= errors.password %> </li>
+      <% } %> 
       </ul>
     <% } %>
   <button class="button">Nýskráning</button>

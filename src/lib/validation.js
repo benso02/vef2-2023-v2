@@ -15,30 +15,33 @@ export function registrationValidationMiddleware(textField) {
   ];
 }
 
-export function registrationValidation() {
-  return [
-    body('name')
-      .trim()
-      .isLength({ min: 1 })
-      .withMessage('Nafn má ekki vera tómt'),
-    body('name')
-      .isLength({ max: 64 })
-      .withMessage('Nafn má að hámarki vera 64 stafir'),
-    body('username')
-      .trim()
-      .isLength({ min: 1 })
-      .withMessage('Notendanafn má ekki vera tómt'),
-    body('username')
-      .isLength({ max: 64 })
-      .withMessage('Notendanafn má að hámarki vera 64 stafir'),
-    body('password')
-      .trim()
-      .isLength({ min: 8 })
-      .withMessage('Lykilorð má ekki vera minna en 8 stafir'),
-    body('password')
-      .isLength({ max: 64 })
-      .withMessage('Lykilorð má að hámarki vera 64 stafir'),
-  ];
+export function registrationValidation(name, username, password) {
+  const errors = {};
+
+  if (!name) {
+    errors.name = 'Nafn má ekki vera tómt';
+  }
+  if (name.length>64){
+    errors.name = 'Nafn má ekki vera lengra en 64 stafir';
+  }
+
+  if (!username) {
+    errors.username = 'Notendanafn má ekki vera tómt';
+  }
+  if (username.length>64){
+    errors.username = 'Notendanafn má ekki vera lengra en 64 stafir';
+  }
+
+  if (!password) {
+    errors.password = 'Lykilorð má ekki vera tómt';
+  }
+
+  if (password>64){
+    errors.password = 'Lykilorð má ekki vera lengra en 64 stafir';
+  }
+
+
+  return  errors;
 }
 
 // Viljum keyra sér og með validation, ver gegn „self XSS“
