@@ -17,6 +17,7 @@ import {
 } from '../lib/validation.js';
  
 export const adminRouter = express.Router();
+
  
 async function index(req, res) {
   const events = await listEvents();
@@ -111,7 +112,6 @@ async function validationCheckUpdate(req, res, next) {
   }
 
   if (!validation.isEmpty() || customValidations.length > 0) {
-    console.log(data)
     
     return res.render('admin-event', {
       username,

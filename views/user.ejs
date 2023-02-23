@@ -4,6 +4,21 @@
 
 <%- include('events') -%>
 
+<div class="pagination">
+  <% if (currentPage > 1) { %>
+    <a href="?page=<%= currentPage - 1 %>">&laquo; Fyrri</a>
+  <% } %>
+  <% for (let i = 1; i <= pageCount; i++) { %>
+    <% if (i === currentPage) { %>
+      <span class="active"><%= i %></span>
+    <% } else { %>
+      <a href="?page=<%= i %>"><%= i %></a>
+    <% } %>
+  <% } %>
+  <% if (currentPage < pageCount) { %>
+    <a href="?page=<%= currentPage + 1 %>">Næsta &raquo;</a>
+  <% } %>
+</div>
 
 <div class="user">
   <p class="user__loggedin">Innskráður sem: <strong><%= username %></strong></p>

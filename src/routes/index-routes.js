@@ -107,7 +107,7 @@ async function registerRoute(req, res) {
 
   return res.render('error');
 }
-indexRouter.get('/', async (req, res) => {
+export async function pagingIndex(req, res){
   const currentPage = req.query.page || 1;
   const eventCount = await getEventCount();
   const maxEvents = eventCount.max;
@@ -116,8 +116,11 @@ indexRouter.get('/', async (req, res) => {
   const title= 'Viðburðasíðan'
   const admin= false;
 
-  res.render('index', { title, events, pageCount, currentPage, admin });
-});
+  return res.render('index', { title, events, pageCount, currentPage, admin });
+
+}
+
+indexRouter.get('/', catchErrors(pagingIndex));
 
 
 indexRouter.get('/', catchErrors(indexRoute));

@@ -1,12 +1,33 @@
 import express from 'express';
 import { catchErrors } from '../lib/catch-errors.js';
-import { dropRegistration, listEvents } from '../lib/db.js';
+import { dropRegistration, getEventCount, getEvents, listEvents } from '../lib/db.js';
 import passport from '../lib/login.js';
 import { createUser, isAdmin } from '../lib/users.js';
 
 
 
 export const userRouter = express.Router();
+
+export async function pagingUser(req, res, username){
+  const currentPage = req.query.page || 1;
+  const eventCount = await getEventCount();
+  const maxEvents = eventCount.max;
+  const pageCount = Math.ceil(maxEvents / 10);
+  const events = await getEvents(currentPage);
+  const admin= false;
+  const title ='Notendasíðan'
+
+  return res.render('user', { 
+    username,
+    events, 
+    pageCount, 
+    currentPage, 
+    admin,
+    errors: [],
+    data: {}, 
+    title,
+  });
+}
 
 async function index(req, res) {
   const events = await listEvents();
@@ -23,17 +44,11 @@ async function index(req, res) {
     });
   }
   
-    return res.render('user', {
-      username,
-      events,
-      errors: [],
-      data: {},
-      title: 'Viðburðir — umsjón',
-      admin: false,
-    });
+    return pagingUser(req,res, username)
   }
 
 
+  
 function login(req, res) {
   if (req.isAuthenticated()) {
     return res.redirect('/user');
