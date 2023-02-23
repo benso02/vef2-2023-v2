@@ -25,7 +25,7 @@ async function index(req, res) {
 
 function login(req, res) {
   if (req.isAuthenticated()) {
-    return res.redirect('/admin');
+    return res.redirect('/user');
   }
 
   let message = '';
@@ -54,7 +54,7 @@ function login(req, res) {
     async (req, res) => {
       const {username } = req.body;
       const admin = await isAdmin(username);
-      if(admin===false){
+      if(admin){
         res.redirect('/admin');
       }
       else {
@@ -99,6 +99,7 @@ function login(req, res) {
   userRouter.post('/user',(req, res)=> {
     res.render('user', {title: 'Notendasíða', errors: []});
   });
+
   
   
 

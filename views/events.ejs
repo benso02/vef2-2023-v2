@@ -7,6 +7,10 @@
         <p class="events__eventDescription"><%= event.description %></p>
         <% if (admin) { %>
           <p><a href="/admin/<%= event.slug %>" class="events__eventEdit">Uppfæra viðburð</a>
+          <form method="post" action="/admin/dropEvent" enctype="application/x-www-form-urlencoded" class="">
+          <button class="button">Eyða viðburð</button>
+          </form>
+      </div>
         <% } %>
       </li>
     <% } %>

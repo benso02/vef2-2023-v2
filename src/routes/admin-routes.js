@@ -3,6 +3,7 @@ import { validationResult } from 'express-validator';
 import { catchErrors } from '../lib/catch-errors.js';
 import {
   createEvent,
+  dropEvent,
   listEvent,
   listEventByName,
   listEvents,
@@ -111,10 +112,10 @@ async function validationCheckUpdate(req, res, next) {
 }
 
 async function registerRoute(req, res) {
-  const { name, description } = req.body;
+  const { name, description, creatorId } = req.body;
   const slug = slugify(name);
 
-  const created = await createEvent({ name, slug, description });
+  const created = await createEvent({ name, slug, description, creatorId });
 
   if (created) {
     return res.redirect('/admin');
@@ -142,6 +143,17 @@ async function updateRoute(req, res) {
   }
 
   return res.render('error');
+}
+async function dropEventRoute(req, res){
+  const { slug } = req.params;
+  const event = await listEvent(slug);
+
+  const created = await dropEvent(event.id)
+  if(created){
+    return res.redirect('/admin')
+  }
+  return res.redirect('error')
+
 }
 
 async function eventRoute(req, res, next) {
@@ -183,5 +195,6 @@ adminRouter.post(
   xssSanitizationMiddleware('description'),
   catchErrors(validationCheckUpdate),
   sanitizationMiddleware('description'),
-  catchErrors(updateRoute)
+  catchErrors(updateRoute),
+  catchErrors(dropEventRoute)
 );

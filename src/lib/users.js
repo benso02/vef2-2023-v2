@@ -34,7 +34,7 @@ export async function isAdmin(username){
     const result = await query(q, [username]);
 
     if (result.rowCount === 1) {
-      return result.rows[0];
+      return !!result.rows[0].admin;
     }
   } catch (e) {
     console.error('Gat ekki fundið notanda eftir notendnafni');
