@@ -57,7 +57,15 @@ app.use((req, res, next) => {
 
 app.use('/admin', adminRouter);
 app.use('/', userRouter); 
-app.use('/', indexRouter); 
+app.use('/', indexRouter);
+
+app.get('/logout', (req, res, next) => {
+  req.logout((err) => {
+    if (err) { return next(err); }
+    return res.redirect('/');
+  });
+});
+ 
 
 
 /** Middleware sem sér um 404 villur. */

@@ -35,13 +35,10 @@ async function index(req, res) {
   });
 }
 
-  return res.render('user', {
-    username,
-    events,
-    errors: [],
-    data: {},
-    title: 'Viðburðir — umsjón',
+  return  res.render('index', {
+    title: 'Viðburðasíðan',
     admin: false,
+    events,
   });
 }
 
@@ -196,6 +193,7 @@ async function eventRoute(req, res, next) {
     data,
   });
 }
+
 adminRouter.post('/dropEvent', catchErrors(dropEventRoute));
  
 adminRouter.get('/', ensureLoggedIn, catchErrors(index));

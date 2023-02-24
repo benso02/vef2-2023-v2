@@ -32,11 +32,11 @@ export function registrationValidation(name, username, password) {
     errors.username = 'Notendanafn má ekki vera lengra en 64 stafir';
   }
 
-  if (!password) {
-    errors.password = 'Lykilorð má ekki vera tómt';
+  if (password.length<8) {
+    errors.password = 'Lykilorð má ekki vera styttra en 8 stafir';
   }
 
-  if (password>64){
+  if (password.length>64){
     errors.password = 'Lykilorð má ekki vera lengra en 64 stafir';
   }
 

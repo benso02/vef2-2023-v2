@@ -102,23 +102,19 @@ function login(req, res) {
 
  async function registerUser(req, res){
   const{name, username, password}= req.body;
-  
-
+  const user = await createUser(name, username, password);
   const errors= registrationValidation(name, username,password);
-
-  if(errors){
-   
+  if(Object.keys(errors).length>0){
     return res.render('register', {title: 'Nýskráning', errors});
   }
-  const user = await createUser(name, username, password);
-
   if(user){
+    
     const message = '';
     return  res.render('login', { message, title: 'Innskráning' })
-  
   }
-  return res.redirect('error')
- }
+  return res.redirect('error');
+ 
+}
 
   userRouter.post('/register', (req, res) => {
 
@@ -133,11 +129,11 @@ function login(req, res) {
   });
 
 
-  userRouter.get('/logout', (req, res) => {
+  /* userRouter.get('/logout', (req, res) => {
     req.logout();
     res.redirect('/');
   });
-  
+   */
   async function dropRegistrationRoute(req, res) {
     const { user: { id} = {} } = req || {};
     const created = await dropRegistration({ id });
