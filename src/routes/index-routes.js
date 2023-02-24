@@ -110,7 +110,12 @@ async function registerRoute(req, res) {
 export async function pagingIndex(req, res){
   const currentPage = req.query.page || 1;
   const eventCount = await getEventCount();
-  const maxEvents = eventCount.max;
+  let maxEvents;
+  if(eventCount!== null){
+   maxEvents = eventCount.max;
+  }else{
+    maxEvents=1;
+  }
   const pageCount = Math.ceil(maxEvents / 10);
   const events = await getEvents(currentPage);
   const title= 'Viðburðasíðan'
