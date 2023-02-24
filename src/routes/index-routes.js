@@ -2,22 +2,21 @@ import express from 'express';
 import { validationResult } from 'express-validator';
 import { catchErrors } from '../lib/catch-errors.js';
 import {
+  checkUserRegistration,
   getEventCount,
   getEvents,
   listEvent,
   listEvents,
   listRegistered,
-  register
+  register,
 } from '../lib/db.js';
 import {
   registrationValidationMiddleware,
   sanitizationMiddleware,
-  xssSanitizationMiddleware
+  xssSanitizationMiddleware,
 } from '../lib/validation.js';
 
-
 export const indexRouter = express.Router();
-
 
 async function indexRoute(req, res) {
   const events = await listEvents();
@@ -32,13 +31,15 @@ async function indexRoute(req, res) {
 async function eventRoute(req, res, next) {
   const { slug } = req.params;
   const event = await listEvent(slug);
+  const { user: { id } = {} } = req || {};
 
   if (!event) {
     return next();
   }
 
   const registered = await listRegistered(event.id);
-  const userRegistration = null;
+
+  const userRegistration = await checkUserRegistration(id, event.id);
 
   return res.render('event', {
     title: `${event.name} — Viðburðasíðan`,
@@ -61,7 +62,7 @@ async function eventRegisteredRoute(req, res) {
 
 async function validationCheck(req, res, next) {
   const { user: { id } = {} } = req || {};
-  const { comment} = req.body;
+  const { comment } = req.body;
 
   // TODO tvítekning frá því að ofan
   const { slug } = req.params;
@@ -70,7 +71,7 @@ async function validationCheck(req, res, next) {
 
   const data = {
     id,
-    comment
+    comment,
   };
 
   const validation = validationResult(req);
@@ -94,7 +95,6 @@ async function registerRoute(req, res) {
   const event = await listEvent(slug);
   const { user: { id } = {} } = req || {};
 
-
   const registered = await register({
     id,
     comment,
@@ -107,26 +107,24 @@ async function registerRoute(req, res) {
 
   return res.render('error');
 }
-export async function pagingIndex(req, res){
+export async function pagingIndex(req, res) {
   const currentPage = req.query.page || 1;
   const eventCount = await getEventCount();
   let maxEvents;
-  if(eventCount!== null){
-   maxEvents = eventCount.max;
-  }else{
-    maxEvents=1;
+  if (eventCount !== null) {
+    maxEvents = eventCount.max;
+  } else {
+    maxEvents = 1;
   }
   const pageCount = Math.ceil(maxEvents / 10);
   const events = await getEvents(currentPage);
-  const title= 'Viðburðasíðan'
-  const admin= false;
+  const title = 'Viðburðasíðan';
+  const admin = false;
 
   return res.render('index', { title, events, pageCount, currentPage, admin });
-
 }
 
 indexRouter.get('/', catchErrors(pagingIndex));
-
 
 indexRouter.get('/', catchErrors(indexRoute));
 indexRouter.get('/:slug', catchErrors(eventRoute));
@@ -139,5 +137,3 @@ indexRouter.post(
   catchErrors(registerRoute)
 );
 indexRouter.get('/:slug/thanks', catchErrors(eventRegisteredRoute));
-
-

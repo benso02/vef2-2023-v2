@@ -21,27 +21,26 @@ export function registrationValidation(name, username, password) {
   if (!name) {
     errors.name = 'Nafn má ekki vera tómt';
   }
-  if (name.length>64){
+  if (name.length > 64) {
     errors.name = 'Nafn má ekki vera lengra en 64 stafir';
   }
 
   if (!username) {
     errors.username = 'Notendanafn má ekki vera tómt';
   }
-  if (username.length>64){
+  if (username.length > 64) {
     errors.username = 'Notendanafn má ekki vera lengra en 64 stafir';
   }
 
-  if (password.length<8) {
+  if (password.length < 8) {
     errors.password = 'Lykilorð má ekki vera styttra en 8 stafir';
   }
 
-  if (password.length>64){
+  if (password.length > 64) {
     errors.password = 'Lykilorð má ekki vera lengra en 64 stafir';
   }
 
-
-  return  errors;
+  return errors;
 }
 
 // Viljum keyra sér og með validation, ver gegn „self XSS“

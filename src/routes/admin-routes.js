@@ -2,10 +2,12 @@ import express from 'express';
 import { validationResult } from 'express-validator';
 import { catchErrors } from '../lib/catch-errors.js';
 import {
-  createEvent, dropEvent, listEvent,
+  createEvent,
+  dropEvent,
+  listEvent,
   listEventByName,
   listEvents,
-  updateEvent
+  updateEvent,
 } from '../lib/db.js';
 import { ensureLoggedIn } from '../lib/login.js';
 import { slugify } from '../lib/slugify.js';
@@ -13,35 +15,32 @@ import { isAdmin } from '../lib/users.js';
 import {
   registrationValidationMiddleware,
   sanitizationMiddleware,
-  xssSanitizationMiddleware
+  xssSanitizationMiddleware,
 } from '../lib/validation.js';
- 
+
 export const adminRouter = express.Router();
 
- 
 async function index(req, res) {
   const events = await listEvents();
   const { user: { username } = {} } = req || {};
 
+  if (isAdmin(username)) {
+    return res.render('admin', {
+      username,
+      events,
+      errors: [],
+      data: {},
+      title: 'Viðburðir — umsjón',
+      admin: true,
+    });
+  }
 
-  if(isAdmin(username)){
-  return res.render('admin', {
-    username,
-    events,
-    errors: [],
-    data: {},
-    title: 'Viðburðir — umsjón',
-    admin: true,
-  });
-}
-
-  return  res.render('index', {
+  return res.render('index', {
     title: 'Viðburðasíðan',
     admin: false,
     events,
   });
 }
-
 
 async function validationCheck(req, res, next) {
   const { name, description } = req.body;
@@ -109,7 +108,6 @@ async function validationCheckUpdate(req, res, next) {
   }
 
   if (!validation.isEmpty() || customValidations.length > 0) {
-    
     return res.render('admin-event', {
       username,
       event,
@@ -124,12 +122,18 @@ async function validationCheckUpdate(req, res, next) {
 }
 
 async function registerRoute(req, res) {
- 
   const { name, URL, location, description } = req.body;
   const slug = slugify(name);
   const creatorId = 1;
 
-  const created = await createEvent({ name, URL, location, slug, description, creatorId });
+  const created = await createEvent({
+    name,
+    URL,
+    location,
+    slug,
+    description,
+    creatorId,
+  });
 
   if (created) {
     return res.redirect('/admin');
@@ -168,7 +172,6 @@ async function dropEventRoute(req, res) {
   return res.render('error');
 }
 
-
 async function eventRoute(req, res, next) {
   const { slug } = req.params;
   const { user: { username } = {} } = req;
@@ -183,7 +186,7 @@ async function eventRoute(req, res, next) {
     description: event.description,
     URL: event.url,
     location: event.location,
-  }
+  };
 
   return res.render('admin-event', {
     username,
@@ -195,7 +198,7 @@ async function eventRoute(req, res, next) {
 }
 
 adminRouter.post('/dropEvent', catchErrors(dropEventRoute));
- 
+
 adminRouter.get('/', ensureLoggedIn, catchErrors(index));
 adminRouter.post(
   '/',
@@ -216,6 +219,5 @@ adminRouter.post(
   xssSanitizationMiddleware('description'),
   catchErrors(validationCheckUpdate),
   sanitizationMiddleware('description'),
-  catchErrors(updateRoute),
+  catchErrors(updateRoute)
 );
-

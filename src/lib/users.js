@@ -27,7 +27,7 @@ export async function findByUsername(username) {
 
   return false;
 }
-export async function isAdmin(username){
+export async function isAdmin(username) {
   const q = 'SELECT admin FROM users WHERE username = $1';
 
   try {

@@ -57,7 +57,14 @@ export async function dropSchema(dropFile = DROP_SCHEMA_FILE) {
   return query(data.toString('utf-8'));
 }
 
-export async function createEvent({ name, URL, location, slug, description, creatorId} = {}) {
+export async function createEvent({
+  name,
+  URL,
+  location,
+  slug,
+  description,
+  creatorId,
+} = {}) {
   const q = `
     INSERT INTO events
       (name, URL, location, slug, description, creatorId)
@@ -74,7 +81,7 @@ export async function createEvent({ name, URL, location, slug, description, crea
 
   return null;
 }
-export async function dropEvent({id}={}) {
+export async function dropEvent({ id } = {}) {
   const q = `
     DELETE FROM
      events
@@ -92,7 +99,10 @@ export async function dropEvent({id}={}) {
 }
 
 // Updatear ekki description, erum ekki að útfæra partial update
-export async function updateEvent(id, { name, slug, description, location, URL } = {}) {
+export async function updateEvent(
+  id,
+  { name, slug, description, location, URL } = {}
+) {
   const q = `
     UPDATE events
       SET
@@ -135,8 +145,8 @@ export async function register({ id, comment, event } = {}) {
   return null;
 }
 
-export async function dropRegistration({id}={}){
-   const q = `
+export async function dropRegistration({ id } = {}) {
+  const q = `
    DELETE FROM
     registrations
      WHERE
@@ -150,7 +160,6 @@ export async function dropRegistration({id}={}){
   }
 
   return false;
-
 }
 export async function listEvents() {
   const q = `
@@ -180,14 +189,14 @@ export async function getEvents(page) {
   ORDER BY id LIMIT $1 OFFSET $2
   `;
 
-  const values = [perPage, offset];    
-    const result = await query(q, values);
+  const values = [perPage, offset];
+  const result = await query(q, values);
 
-    if (result) {
-      return result.rows;
-    }
-    
-    return null;
+  if (result) {
+    return result.rows;
+  }
+
+  return null;
 }
 
 export async function listEvent(slug) {
@@ -221,10 +230,7 @@ export async function getEventCount() {
   }
 
   return null;
-
 }
-
-
 
 // TODO gætum fellt þetta fall saman við það að ofan
 export async function listEventByName(name) {
@@ -267,4 +273,22 @@ export async function listRegistered(event) {
 
 export async function end() {
   await pool.end();
+}
+
+export async function checkUserRegistration(userid, eventid) {
+  const q = `
+  SELECT
+    *
+  FROM
+    registrations
+  WHERE userId = $1 AND event = $2
+`;
+
+  const result = await query(q, [userid, eventid]);
+
+  if (result && result.rows.length > 0) {
+    return true;
+  }
+
+  return false;
 }
